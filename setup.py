@@ -58,15 +58,14 @@ data_files_config(data_files, 'docs','src/docs/','*')
 #It will be used to collect entries without installing the package
 janitoo_entry_points = {
     "janitoo.components": [
-        "rpispi.pn532reader = janitoo_raspberry_spi_pn532.pn532:make_reader",
-        "rpispi.pn532writer = janitoo_raspberry_spi_pn532.pn532:make_writer",
+        "rpispi.make_pn532 = janitoo_raspberry_spi_pn532.pn532:make_make_pn532",
     ],
 }
 
 setup(
     name = 'janitoo_raspberry_spi_pn532',
-    description = "Manage an NFC PN532",
-    long_description = """nfc pn532
+    description = "Manage an RFID PN532",
+    long_description = """nfc pn532 rfid
     """,
     author='Sébastien GALLET aka bibi2100 <bibi21000@gmail.com>',
     author_email='bibi21000@gmail.com',
@@ -91,7 +90,7 @@ setup(
     zip_safe = False,
     packages = find_packages('src', exclude=["scripts", "docs", "config"]),
     package_dir = { '': 'src' },
-    keywords = "raspberry,lcd",
+    keywords = "raspberry,rfid",
     include_package_data=True,
     data_files = data_files,
     install_requires=[

@@ -59,13 +59,10 @@ assert(COMMAND_DESC[COMMAND_SWITCH_BINARY] == 'COMMAND_SWITCH_BINARY')
 assert(COMMAND_DESC[COMMAND_MOTOR] == 'COMMAND_MOTOR')
 ##############################################################
 
-def make_reader(**kwargs):
-    return ReaderComponent(**kwargs)
+def make_pn532(**kwargs):
+    return PN532Component(**kwargs)
 
-def make_writer(**kwargs):
-    return WriterComponent(**kwargs)
-
-class ReaderComponent(JNTComponent):
+class PN532Component(JNTComponent):
     """ A NFC reader component for spi """
 
     def __init__(self, bus=None, addr=None, **kwargs):
@@ -100,6 +97,8 @@ class ReaderComponent(JNTComponent):
             self.pn532 = PN532.PN532(dc_pin,
                 spi=self._bus.get_spi_device(device, max_speed_hz=1000000),
                 gpio=self._ada_gpio)
+            self.pn532.begin()
+            self.pn532.SAM_configuration()
         except:
             logger.exception("[%s] - Can't start component", self.__class__.__name__)
         finally:
