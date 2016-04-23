@@ -118,4 +118,4 @@ class ReaderComponent(JNTComponent):
         """Check that the component is 'available'
 
         """
-        return self.tft is not None
+        return self.pn532 is not None
