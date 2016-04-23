@@ -96,7 +96,7 @@ class ReaderComponent(JNTComponent):
         self._bus.spi_acquire()
         try:
             device = self.values["device"].data
-            dc_pin = self.get_spi_device_pin(device)
+            dc_pin = self._bus.get_spi_device_pin(device)
             self.pn532 = PN532.PN532(dc_pin,
                 spi=self._bus.get_spi_device(device, max_speed_hz=1000000),
                 gpio=self._ada_gpio)
@@ -154,7 +154,7 @@ class WriterComponent(JNTComponent):
         self._bus.spi_acquire()
         try:
             device = self.values["device"].data
-            dc_pin = self.get_spi_device_pin(device)
+            dc_pin = self._bus.get_spi_device_pin(device)
             self.pn532 = PN532.PN532(dc_pin,
                 spi=self._bus.get_spi_device(device, max_speed_hz=1000000),
                 gpio=self._ada_gpio)
