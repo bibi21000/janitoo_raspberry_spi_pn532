@@ -44,14 +44,10 @@ from janitoo.utils import TOPIC_NODES, TOPIC_NODES_REPLY, TOPIC_NODES_REQUEST
 from janitoo.utils import TOPIC_BROADCAST_REPLY, TOPIC_BROADCAST_REQUEST
 from janitoo.utils import TOPIC_VALUES_USER, TOPIC_VALUES_CONFIG, TOPIC_VALUES_SYSTEM, TOPIC_VALUES_BASIC
 
-import janitoo_raspberry_spi_ili9341.ili9341
+import janitoo_raspberry_spi_pn532.PN532Component
 
 class TestPN532ReaderComponent(JNTTComponent, JNTTComponentCommon):
     """Test the component
     """
-    component_name = "rpispi.pn532reader"
+    component_name = "rpispi.pn532"
 
-class TestPN532WriterComponent(JNTTComponent, JNTTComponentCommon):
-    """Test the component
-    """
-    component_name = "rpispi.pn532writer"

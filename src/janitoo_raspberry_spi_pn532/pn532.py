@@ -83,11 +83,29 @@ class PN532Component(JNTComponent):
             label='device',
             default=0,
         )
-        poll_value = self.values[uuid].create_poll_value(default=300)
+        uuid="listen"
+        self.values[uuid] = self.value_factory['action_boolean'](options=self.options, uuid=uuid,
+            node_uuid=self.uuid,
+            help='Activate/deactivate the listen mode',
+            label='Listen',
+            default=False,
+            set_data_cb=self.set_listen,
+            is_writeonly = True,
+            cmd_class=COMMAND_SCREEN_MESSAGE,
+            genre=0x01,
+        )
         self.pn532 = None
+        self.listen_timer = None
+        uuid="listen_delay"
+        self.values[uuid] = self.value_factory['config_integer'](options=self.options, uuid=uuid,
+            node_uuid=self.uuid,
+            help='The delay between 2 listens',
+            label='Delay.',
+            default=1,
+        )
 
     def start(self, mqttc):
-        """Start the bus
+        """Start the component
         """
         JNTComponent.start(self, mqttc)
         self._bus.spi_acquire()
@@ -107,6 +125,7 @@ class PN532Component(JNTComponent):
     def stop(self):
         """
         """
+        self.stop_listen()
         JNTComponent.stop(self)
         self._bus.spi_acquire()
         try:
@@ -122,60 +141,46 @@ class PN532Component(JNTComponent):
         """
         return self.pn532 is not None
 
-class WriterComponent(JNTComponent):
-    """ A NFC reader component for spi """
+    def set_listen(self, node_uuid, index, data):
+        """Reset the screen
+        """
+        if data == True:
+            if self.listen_timer is None:
+                self.listen_timer = threading.Timer(self.values['listen_delay'].data, self.on_listen)
+                self.listen_timer.start()
+        else:
+            self.stop_listen()
 
-    def __init__(self, bus=None, addr=None, **kwargs):
-        """
-        """
-        oid = kwargs.pop('oid', 'rpispi.pn532writer')
-        name = kwargs.pop('name', "Screen")
-        product_name = kwargs.pop('product_name', "RFID writer")
-        product_type = kwargs.pop('product_type', "RFID writer")
-        product_manufacturer = kwargs.pop('product_manufacturer', "Janitoo")
-        JNTComponent.__init__(self, oid=oid, bus=bus, addr=addr, name=name,
-                product_name=product_name, product_type=product_type, product_manufacturer=product_manufacturer, **kwargs)
-        logger.debug("[%s] - __init__ node uuid:%s", self.__class__.__name__, self.uuid)
-        uuid="device"
-        self.values[uuid] = self.value_factory['config_byte'](options=self.options, uuid=uuid,
-            node_uuid=self.uuid,
-            help='Either the device number on the hardware bus or the SPI CS pin of the software one',
-            label='device',
-            default=0,
-        )
-        poll_value = self.values[uuid].create_poll_value(default=300)
-        self.pn532 = None
-
-    def start(self, mqttc):
-        """Start the bus
-        """
-        JNTComponent.start(self, mqttc)
-        self._bus.spi_acquire()
-        try:
-            device = self.values["device"].data
-            dc_pin = self._bus.get_spi_device_pin(device)
-            self.pn532 = PN532.PN532(dc_pin,
-                spi=self._bus.get_spi_device(device, max_speed_hz=1000000),
-                gpio=self._ada_gpio)
-        except:
-            logger.exception("[%s] - Can't start component", self.__class__.__name__)
-        finally:
-            self._bus.spi_release()
-
-    def stop(self):
-        """
-        """
-        JNTComponent.stop(self)
-        self._bus.spi_acquire()
-        try:
-            self.pn532 = None
-        except:
-            logger.exception('[%s] - Exception when stopping', self.__class__.__name__)
-        finally:
-            self._bus.spi_release()
-
-    def check_heartbeat(self):
+    def stop_listen(self):
         """Check that the component is 'available'
 
         """
-        return self.pn532 is not None
+        if self.listen_timer is not None:
+            self.listen_timer.cancel()
+            self.listen_timer = None
+
+    def on_listen(self):
+        """Make a check using a timer.
+
+        """
+        self.stop_listen()
+        state = True
+        self._bus.spi_acquire()
+        try:
+            uid = pn532.read_passive_target()
+            if uid is not None:
+                logger.debug('[%s] - Read rfid %s', self.__class__.__name__, binascii.hexlify(uid))
+                # Authenticate and read block 4.
+                if not pn532.mifare_classic_authenticate_block(uid, 4, PN532.MIFARE_CMD_AUTH_B, CARD_KEY):
+                    raise RuntimeError('Failed to authenticate with card')
+                data = pn532.mifare_classic_read_block(4)
+                if data is None:
+                    raise RuntimeError('Failed to read data from card')
+                #We should notify something hear
+        except:
+            logger.exception('[%s] - Exception when reading rfid', self.__class__.__name__)
+        finally:
+            self._bus.spi_release()
+        if self.listen_timer is None and self._bus.is_started:
+            self.listen_timer = threading.Timer(self.values['listen_delay'].data, self.on_listen)
+            self.listen_timer.start()

@@ -51,7 +51,7 @@ class TestRaspberryILI9341Serser(JNTTDockerServer, JNTTDockerServerCommon):
     broker_password = 'toto'
     server_class = PiServer
     server_conf = "tests/data/janitoo_raspberry_pn532.conf"
-    hadds = [HADD%(146,0), HADD%(146,1), HADD%(146,2)]
+    hadds = [HADD%(146,0), HADD%(146,1)]
 
     def test_040_server_start_no_error_in_log(self):
         JNTTDockerServer.onlyDockerTest()
