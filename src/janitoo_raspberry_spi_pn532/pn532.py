@@ -31,6 +31,9 @@ logger = logging.getLogger(__name__)
 import os, sys
 import threading
 
+import cStringIO
+import base64
+
 from janitoo.thread import JNTBusThread, BaseThread
 from janitoo.options import get_option_autostart
 from janitoo.utils import HADD
@@ -100,9 +103,19 @@ class PN532Component(JNTComponent):
         self.values[uuid] = self.value_factory['config_integer'](options=self.options, uuid=uuid,
             node_uuid=self.uuid,
             help='The delay between 2 listens',
-            label='Delay.',
+            label='Delay',
             default=1,
         )
+        uuid="status"
+        self.values[uuid] = self.value_factory['sensor_list'](options=self.options, uuid=uuid,
+            node_uuid=self.uuid,
+            help='The status of the pn532',
+            label='Status',
+            default='sleeping',
+            list_items=['sleeping', 'listening', 'write_ok', 'write_error'],
+        )
+        poll_value = self.values[uuid].create_poll_value(default=300)
+        self.values[poll_value.uuid] = poll_value
 
     def start(self, mqttc):
         """Start the component
@@ -148,7 +161,9 @@ class PN532Component(JNTComponent):
             if self.listen_timer is None:
                 self.listen_timer = threading.Timer(self.values['listen_delay'].data, self.on_listen)
                 self.listen_timer.start()
+                self.values["status"].data='listening'
         else:
+            self.values["status"].data='sleeping'
             self.stop_listen()
 
     def stop_listen(self):
@@ -167,13 +182,14 @@ class PN532Component(JNTComponent):
         state = True
         self._bus.spi_acquire()
         try:
-            uid = pn532.read_passive_target()
+            self.values["status"].data='listening'
+            uid = self.pn532.read_passive_target()
             if uid is not None:
                 logger.debug('[%s] - Read rfid %s', self.__class__.__name__, binascii.hexlify(uid))
                 # Authenticate and read block 4.
-                if not pn532.mifare_classic_authenticate_block(uid, 4, PN532.MIFARE_CMD_AUTH_B, CARD_KEY):
+                if not self.pn532.mifare_classic_authenticate_block(uid, 4, PN532.MIFARE_CMD_AUTH_B, CARD_KEY):
                     raise RuntimeError('Failed to authenticate with card')
-                data = pn532.mifare_classic_read_block(4)
+                data = self.pn532.mifare_classic_read_block(4)
                 if data is None:
                     raise RuntimeError('Failed to read data from card')
                 #We should notify something hear
@@ -184,3 +200,27 @@ class PN532Component(JNTComponent):
         if self.listen_timer is None and self._bus.is_started:
             self.listen_timer = threading.Timer(self.values['listen_delay'].data, self.on_listen)
             self.listen_timer.start()
+
+    def set_write(self, node_uuid, index, data):
+        """Write base64 data to card
+        """
+        self._bus.spi_acquire()
+        try:
+            sio = base64.base64_decode(data)
+            uid = self.pn532.read_passive_target()
+            if uid is None:
+                raise RuntimeError('No card found')
+            logger.debug('[%s] - Read rfid %s', self.__class__.__name__, binascii.hexlify(uid))
+            # Authenticate and read block 4.
+            if not self.pn532.mifare_classic_authenticate_block(uid, 4, PN532.MIFARE_CMD_AUTH_B, CARD_KEY):
+                raise RuntimeError('Failed to authenticate with card')
+            if not self.pn532.mifare_classic_write_block(4, sio):
+                raise RuntimeError('Failed to write data to the card.')
+            self.values["status"].data='write_ok'
+            #We should notify something hear
+        except:
+            logger.exception('[%s] - Exception when writing RFID card', self.__class__.__name__)
+            self.values["status"].data='write_error'
+            #We should notify something hear
+        finally:
+            self._bus.spi_release()
