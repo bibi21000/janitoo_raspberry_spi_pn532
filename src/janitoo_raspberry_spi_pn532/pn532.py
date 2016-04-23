@@ -39,7 +39,7 @@ from janitoo.value import JNTValue
 from janitoo.component import JNTComponent
 
 try:
-    import Adafruit_ILI9341 as TFT
+    import Adafruit_PN532 as PN532
     import Adafruit_GPIO as GPIO
     import Adafruit_GPIO.SPI as SPI
 except:
@@ -59,19 +59,19 @@ assert(COMMAND_DESC[COMMAND_SWITCH_BINARY] == 'COMMAND_SWITCH_BINARY')
 assert(COMMAND_DESC[COMMAND_MOTOR] == 'COMMAND_MOTOR')
 ##############################################################
 
-def make_screen(**kwargs):
-    return ScreenComponent(**kwargs)
+def make_reader(**kwargs):
+    return ReaderComponent(**kwargs)
 
-class ScreenComponent(JNTComponent):
+class ReaderComponent(JNTComponent):
     """ A Screen component for spi """
 
     def __init__(self, bus=None, addr=None, **kwargs):
         """
         """
-        oid = kwargs.pop('oid', 'rpispi.ili9341')
+        oid = kwargs.pop('oid', 'rpispi.pn532reader')
         name = kwargs.pop('name', "Screen")
-        product_name = kwargs.pop('product_name', "Screen")
-        product_type = kwargs.pop('product_type', "Screen")
+        product_name = kwargs.pop('product_name', "NFC reader")
+        product_type = kwargs.pop('product_type', "NFC reader")
         product_manufacturer = kwargs.pop('product_manufacturer', "Janitoo")
         JNTComponent.__init__(self, oid=oid, bus=bus, addr=addr, name=name,
                 product_name=product_name, product_type=product_type, product_manufacturer=product_manufacturer, **kwargs)
@@ -83,26 +83,8 @@ class ScreenComponent(JNTComponent):
             label='device',
             default=0,
         )
-        uuid="reset"
-        self.values[uuid] = self.value_factory['config_byte'](options=self.options, uuid=uuid,
-            node_uuid=self.uuid,
-            help='The reset pin',
-            label='reset',
-            default=None,
-        )
-        uuid="message"
-        self.values[uuid] = self.value_factory['action_string'](options=self.options, uuid=uuid,
-            node_uuid=self.uuid,
-            help='A message to print on the screen',
-            label='Msg',
-            default='Janitoo started',
-            set_data_cb=self.set_message,
-            is_writeonly = True,
-            cmd_class=COMMAND_MOTOR,
-            genre=0x01,
-        )
         poll_value = self.values[uuid].create_poll_value(default=300)
-        self.tft = None
+        self.pn532 = None
 
     def start(self, mqttc):
         """Start the bus
@@ -111,18 +93,12 @@ class ScreenComponent(JNTComponent):
         self._bus.spi_acquire()
         try:
             device = self.values["device"].data
-            reset = self.values["reset"].data
-            if device==0:
-                #map spi_device to pin number. On a pi2 0 ->18
-                dc_pin = 18
-            else:
-                dc_pin = device
-
-            self.tft = TFT.ILI9341(dc_pin, rst=reset,
-                spi=self._bus.get_spi_device(device, max_speed_hz=64000000),
+            dc_pin = self.get_spi_device_pin(device)
+            self.pn532 = PN532.PN532(dc_pin,
+                spi=self._bus.get_spi_device(device, max_speed_hz=1000000),
                 gpio=self._ada_gpio)
         except:
-            logger.exception("Can't start component camera")
+            logger.exception("Can't start component")
         finally:
             self._bus.spi_release()
 
@@ -132,20 +108,11 @@ class ScreenComponent(JNTComponent):
         JNTComponent.stop(self)
         self._bus.spi_acquire()
         try:
-            self.tft = None
+            self.pn532 = None
         except:
             logger.exception('[%s] - Exception when stopping', self.__class__.__name__)
         finally:
             self._bus.spi_release()
-
-    def set_message(self, node_uuid, index, data):
-        """Set the message on the screen
-        """
-        try:
-            lcd.clear()
-            lcd.message(data)
-        except:
-            logger.exception('Exception when displaying message')
 
     def check_heartbeat(self):
         """Check that the component is 'available'

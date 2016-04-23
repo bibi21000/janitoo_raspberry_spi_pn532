@@ -58,14 +58,14 @@ data_files_config(data_files, 'docs','src/docs/','*')
 #It will be used to collect entries without installing the package
 janitoo_entry_points = {
     "janitoo.components": [
-        "rpispi.ili9341 = janitoo_raspberry_spi_ili9341.ili9341:make_screen",
+        "rpispi.pn532reader = janitoo_raspberry_spi_pn532.pn532:make_reader",
     ],
 }
 
 setup(
-    name = 'janitoo_raspberry_spi_ili9341',
-    description = "Manage an ili9341 screen",
-    long_description = """lcd char
+    name = 'janitoo_raspberry_spi_pn532',
+    description = "Manage an NFC PN532",
+    long_description = """nfc pn532
     """,
     author='Sébastien GALLET aka bibi2100 <bibi21000@gmail.com>',
     author_email='bibi21000@gmail.com',
@@ -97,14 +97,14 @@ setup(
                      'janitoo',
                      'janitoo_raspberry',
                      'janitoo_raspberry_spi',
-                     'Adafruit_ILI9341',
+                     'Adafruit_PN532',
                     ],
     dependency_links = [
       'https://github.com/bibi21000/janitoo/archive/master.zip#egg=janitoo',
       'https://github.com/bibi21000/janitoo_raspberry/archive/master.zip#egg=janitoo_raspberry',
       'https://github.com/bibi21000/janitoo_raspberry_spi/archive/master.zip#egg=janitoo_raspberry_spi',
       'https://github.com/adafruit/Adafruit_Python_GPIO/archive/master.zip#egg=Adafruit-GPIO',
-      'https://github.com/adafruit/Adafruit_Python_ILI9341/archive/master.zip#egg=Adafruit_ILI9341',
+      'https://github.com/adafruit/Adafruit_Python_PN532/archive/master.zip#egg=Adafruit_PN532',
     ],
     entry_points = janitoo_entry_points,
 )
