@@ -46,7 +46,12 @@ from janitoo.utils import TOPIC_VALUES_USER, TOPIC_VALUES_CONFIG, TOPIC_VALUES_S
 
 import janitoo_raspberry_spi_ili9341.ili9341
 
-class TestLcdcharComponent(JNTTComponent, JNTTComponentCommon):
+class TestPN532ReaderComponent(JNTTComponent, JNTTComponentCommon):
     """Test the component
     """
     component_name = "rpispi.pn532reader"
+
+class TestPN532WriterComponent(JNTTComponent, JNTTComponentCommon):
+    """Test the component
+    """
+    component_name = "rpispi.pn532writer"
