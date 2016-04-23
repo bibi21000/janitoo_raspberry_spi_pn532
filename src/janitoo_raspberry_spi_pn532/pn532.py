@@ -62,16 +62,77 @@ assert(COMMAND_DESC[COMMAND_MOTOR] == 'COMMAND_MOTOR')
 def make_reader(**kwargs):
     return ReaderComponent(**kwargs)
 
+def make_writer(**kwargs):
+    return WriterComponent(**kwargs)
+
 class ReaderComponent(JNTComponent):
-    """ A Screen component for spi """
+    """ A NFC reader component for spi """
 
     def __init__(self, bus=None, addr=None, **kwargs):
         """
         """
         oid = kwargs.pop('oid', 'rpispi.pn532reader')
         name = kwargs.pop('name', "Screen")
-        product_name = kwargs.pop('product_name', "NFC reader")
-        product_type = kwargs.pop('product_type', "NFC reader")
+        product_name = kwargs.pop('product_name', "RFID reader")
+        product_type = kwargs.pop('product_type', "RFID reader")
+        product_manufacturer = kwargs.pop('product_manufacturer', "Janitoo")
+        JNTComponent.__init__(self, oid=oid, bus=bus, addr=addr, name=name,
+                product_name=product_name, product_type=product_type, product_manufacturer=product_manufacturer, **kwargs)
+        logger.debug("[%s] - __init__ node uuid:%s", self.__class__.__name__, self.uuid)
+        uuid="device"
+        self.values[uuid] = self.value_factory['config_byte'](options=self.options, uuid=uuid,
+            node_uuid=self.uuid,
+            help='Either the device number on the hardware bus or the SPI CS pin of the software one',
+            label='device',
+            default=0,
+        )
+        poll_value = self.values[uuid].create_poll_value(default=300)
+        self.pn532 = None
+
+    def start(self, mqttc):
+        """Start the bus
+        """
+        JNTComponent.start(self, mqttc)
+        self._bus.spi_acquire()
+        try:
+            device = self.values["device"].data
+            dc_pin = self.get_spi_device_pin(device)
+            self.pn532 = PN532.PN532(dc_pin,
+                spi=self._bus.get_spi_device(device, max_speed_hz=1000000),
+                gpio=self._ada_gpio)
+        except:
+            logger.exception("[%s] - Can't start component", self.__class__.__name__)
+        finally:
+            self._bus.spi_release()
+
+    def stop(self):
+        """
+        """
+        JNTComponent.stop(self)
+        self._bus.spi_acquire()
+        try:
+            self.pn532 = None
+        except:
+            logger.exception('[%s] - Exception when stopping', self.__class__.__name__)
+        finally:
+            self._bus.spi_release()
+
+    def check_heartbeat(self):
+        """Check that the component is 'available'
+
+        """
+        return self.pn532 is not None
+
+class WriterComponent(JNTComponent):
+    """ A NFC reader component for spi """
+
+    def __init__(self, bus=None, addr=None, **kwargs):
+        """
+        """
+        oid = kwargs.pop('oid', 'rpispi.pn532writer')
+        name = kwargs.pop('name', "Screen")
+        product_name = kwargs.pop('product_name', "RFID writer")
+        product_type = kwargs.pop('product_type', "RFID writer")
         product_manufacturer = kwargs.pop('product_manufacturer', "Janitoo")
         JNTComponent.__init__(self, oid=oid, bus=bus, addr=addr, name=name,
                 product_name=product_name, product_type=product_type, product_manufacturer=product_manufacturer, **kwargs)

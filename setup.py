@@ -59,6 +59,7 @@ data_files_config(data_files, 'docs','src/docs/','*')
 janitoo_entry_points = {
     "janitoo.components": [
         "rpispi.pn532reader = janitoo_raspberry_spi_pn532.pn532:make_reader",
+        "rpispi.pn532writer = janitoo_raspberry_spi_pn532.pn532:make_writer",
     ],
 }
 
