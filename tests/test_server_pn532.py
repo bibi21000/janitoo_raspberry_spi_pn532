@@ -54,7 +54,7 @@ class TestIli9341Serser(JNTTServer, JNTTServerCommon):
     broker_password = 'toto'
     server_class = PiServer
     server_conf = "tests/data/janitoo_raspberry_pn532.conf"
-    hadds = [HADD%(146,0), HADD%(146,1)]
+    hadds = [HADD%(146,0), HADD%(146,1), HADD%(146,2)]
 
     def test_011_start_reload_stop(self):
         self.skipRasperryTest()
