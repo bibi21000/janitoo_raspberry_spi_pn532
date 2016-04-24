@@ -58,7 +58,7 @@ data_files_config(data_files, 'docs','src/docs/','*')
 #It will be used to collect entries without installing the package
 janitoo_entry_points = {
     "janitoo.components": [
-        "rpispi.make_pn532 = janitoo_raspberry_spi_pn532.pn532:make_make_pn532",
+        "rpispi.pn532 = janitoo_raspberry_spi_pn532.pn532:make_make_pn532",
     ],
 }
 

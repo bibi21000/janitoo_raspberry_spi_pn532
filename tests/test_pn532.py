@@ -46,7 +46,7 @@ from janitoo.utils import TOPIC_VALUES_USER, TOPIC_VALUES_CONFIG, TOPIC_VALUES_S
 
 import janitoo_raspberry_spi_pn532.PN532Component
 
-class TestPN532ReaderComponent(JNTTComponent, JNTTComponentCommon):
+class TestPN532Component(JNTTComponent, JNTTComponentCommon):
     """Test the component
     """
     component_name = "rpispi.pn532"
