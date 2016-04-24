@@ -71,7 +71,7 @@ class PN532Component(JNTComponent):
     def __init__(self, bus=None, addr=None, **kwargs):
         """
         """
-        oid = kwargs.pop('oid', 'rpispi.pn532reader')
+        oid = kwargs.pop('oid', 'rpispi.pn532')
         name = kwargs.pop('name', "Screen")
         product_name = kwargs.pop('product_name', "RFID reader")
         product_type = kwargs.pop('product_type', "RFID reader")
