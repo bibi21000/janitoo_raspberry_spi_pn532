@@ -45,7 +45,7 @@ from janitoo.utils import TOPIC_VALUES_USER, TOPIC_VALUES_CONFIG, TOPIC_VALUES_S
 
 from janitoo_raspberry.server import PiServer
 
-class TestIli9341Serser(JNTTServer, JNTTServerCommon):
+class TestPN532Serser(JNTTServer, JNTTServerCommon):
     """Test the pi server
     """
     loglevel = logging.DEBUG

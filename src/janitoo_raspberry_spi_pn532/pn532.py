@@ -90,7 +90,7 @@ class PN532Component(JNTComponent):
             default=False,
             set_data_cb=self.set_listen,
             is_writeonly = True,
-            cmd_class=COMMAND_SCREEN_MESSAGE,
+            cmd_class=COMMAND_CONTROLLER,
             genre=0x01,
         )
         self.pn532 = None
