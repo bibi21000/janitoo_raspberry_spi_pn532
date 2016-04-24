@@ -53,13 +53,9 @@ except:
 #Must be implemented for non-regression
 from janitoo.classes import COMMAND_DESC
 
-COMMAND_MOTOR = 0x3100
-COMMAND_SWITCH_MULTILEVEL = 0x0026
-COMMAND_SWITCH_BINARY = 0x0025
+COMMAND_CONTROLLER = 0x1050
 
-assert(COMMAND_DESC[COMMAND_SWITCH_MULTILEVEL] == 'COMMAND_SWITCH_MULTILEVEL')
-assert(COMMAND_DESC[COMMAND_SWITCH_BINARY] == 'COMMAND_SWITCH_BINARY')
-assert(COMMAND_DESC[COMMAND_MOTOR] == 'COMMAND_MOTOR')
+assert(COMMAND_DESC[COMMAND_CONTROLLER] == 'COMMAND_CONTROLLER')
 ##############################################################
 
 def make_pn532(**kwargs):
@@ -73,8 +69,8 @@ class PN532Component(JNTComponent):
         """
         oid = kwargs.pop('oid', 'rpispi.pn532')
         name = kwargs.pop('name', "Screen")
-        product_name = kwargs.pop('product_name', "RFID reader")
-        product_type = kwargs.pop('product_type', "RFID reader")
+        product_name = kwargs.pop('product_name', "RFID component")
+        product_type = kwargs.pop('product_type', "RFID component")
         product_manufacturer = kwargs.pop('product_manufacturer', "Janitoo")
         JNTComponent.__init__(self, oid=oid, bus=bus, addr=addr, name=name,
                 product_name=product_name, product_type=product_type, product_manufacturer=product_manufacturer, **kwargs)
