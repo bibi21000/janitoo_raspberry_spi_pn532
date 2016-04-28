@@ -121,21 +121,32 @@ class PN532Component(JNTComponent):
         try:
             device = self.values["device"].data
             dc_pin = self._bus.get_spi_device_pin(device)
-            self.pn532 = PN532.PN532(dc_pin,
-                spi=self._bus.get_spi_device(device, max_speed_hz=1000000),
-                gpio=self._ada_gpio)
-            self.pn532.begin()
-            self.pn532.SAM_configuration()
+            spi = self._bus.get_spi_device(device, max_speed_hz=1000000)
+            self.setup_pn532(dc_pin, spi, self._ada_gpio)
         except:
             logger.exception("[%s] - Can't start component", self.__class__.__name__)
         finally:
             self._bus.spi_release()
+
+    def setup_pn532(self, dc_pin, spi, gpio):
+        """
+        """
+        logger.debug("[%s] - Init the TFT", self.__class__.__name__)
+        self.pn532 = PN532.PN532(dc_pin, spi, gpio)
+        logger.debug("[%s] - Begin the TFT", self.__class__.__name__)
+        self.pn532.begin()
+        logger.debug("[%s] - Clear the TFT", self.__class__.__name__)
+        self.pn532.SAM_configuration()
 
     def stop(self):
         """
         """
         self.stop_listen()
         JNTComponent.stop(self)
+        if self._bus.spi_locked():
+            logger.warning('[%s] - Bus is locked. Close device anyway.', self.__class__.__name__)
+            if self.pn532 is not None:
+                self.pn532.close()
         self._bus.spi_acquire()
         try:
             self.pn532.close()
@@ -177,30 +188,35 @@ class PN532Component(JNTComponent):
         """
         self.stop_listen()
         state = True
-        self._bus.spi_acquire()
-        try:
-            self.values["status"].data='listening'
-            uid = self.pn532.read_passive_target()
-            if uid is not None:
-                logger.debug('[%s] - Read rfid %s', self.__class__.__name__, binascii.hexlify(uid))
-                # Authenticate and read block 4.
-                if not self.pn532.mifare_classic_authenticate_block(uid, 4, PN532.MIFARE_CMD_AUTH_B, CARD_KEY):
-                    raise RuntimeError('Failed to authenticate with card')
-                data = self.pn532.mifare_classic_read_block(4)
-                if data is None:
-                    raise RuntimeError('Failed to read data from card')
-                #We should notify something hear
-        except:
-            logger.exception('[%s] - Exception when reading rfid', self.__class__.__name__)
-        finally:
-            self._bus.spi_release()
+        next_run = self.values['listen_delay'].data
+        if self._bus.spi_acquire( blocking = False ):
+            try:
+                self.values["status"].data='listening'
+                uid = self.pn532.read_passive_target()
+                if uid is not None:
+                    logger.debug('[%s] - Read rfid %s', self.__class__.__name__, binascii.hexlify(uid))
+                    # Authenticate and read block 4.
+                    if not self.pn532.mifare_classic_authenticate_block(uid, 4, PN532.MIFARE_CMD_AUTH_B, CARD_KEY):
+                        raise RuntimeError('Failed to authenticate with card')
+                    data = self.pn532.mifare_classic_read_block(4)
+                    if data is None:
+                        raise RuntimeError('Failed to read data from card')
+                    #We should notify something hear
+            except:
+                logger.exception('[%s] - Exception when reading rfid', self.__class__.__name__)
+            finally:
+                self._bus.spi_release()
+        else:
+            next_run = next_run / 2
+            logger.warning("[%s] - Can't get lock when listening RFID. Will retry in %s seconds", self.__class__.__name__, next_run)
         if self.listen_timer is None and self._bus.is_started:
-            self.listen_timer = threading.Timer(self.values['listen_delay'].data, self.on_listen)
+            self.listen_timer = threading.Timer(next_run, self.on_listen)
             self.listen_timer.start()
 
     def set_write(self, node_uuid, index, data):
         """Write base64 data to card
         """
+        #Will wait to get lock indefintively
         self._bus.spi_acquire()
         try:
             sio = base64.base64_decode(data)
@@ -214,10 +230,10 @@ class PN532Component(JNTComponent):
             if not self.pn532.mifare_classic_write_block(4, sio):
                 raise RuntimeError('Failed to write data to the card.')
             self.values["status"].data='write_ok'
-            #We should notify something hear
+            #We should notify something here
         except:
             logger.exception('[%s] - Exception when writing RFID card', self.__class__.__name__)
             self.values["status"].data='write_error'
-            #We should notify something hear
+            #We should notify something here
         finally:
             self._bus.spi_release()
