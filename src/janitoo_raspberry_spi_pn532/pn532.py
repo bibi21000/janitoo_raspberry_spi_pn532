@@ -138,10 +138,11 @@ class PN532Component(JNTComponent):
         JNTComponent.stop(self)
         self._bus.spi_acquire()
         try:
-            self.pn532 = None
+            self.pn532.close()
         except:
             logger.exception('[%s] - Exception when stopping', self.__class__.__name__)
         finally:
+            self.pn532 = None
             self._bus.spi_release()
 
     def check_heartbeat(self):
