@@ -71,9 +71,8 @@ class PN532Component(JNTComponent):
         name = kwargs.pop('name', "Screen")
         product_name = kwargs.pop('product_name', "RFID component")
         product_type = kwargs.pop('product_type', "RFID component")
-        product_manufacturer = kwargs.pop('product_manufacturer', "Janitoo")
         JNTComponent.__init__(self, oid=oid, bus=bus, addr=addr, name=name,
-                product_name=product_name, product_type=product_type, product_manufacturer=product_manufacturer, **kwargs)
+                product_name=product_name, product_type=product_type, **kwargs)
         logger.debug("[%s] - __init__ node uuid:%s", self.__class__.__name__, self.uuid)
         uuid="device"
         self.values[uuid] = self.value_factory['config_byte'](options=self.options, uuid=uuid,
