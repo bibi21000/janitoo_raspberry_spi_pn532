@@ -1,0 +1,22 @@
+janitoo_raspberry_spi_pn532 package
+===================================
+
+Submodules
+----------
+
+janitoo_raspberry_spi_pn532.pn532 module
+----------------------------------------
+
+.. automodule:: janitoo_raspberry_spi_pn532.pn532
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: janitoo_raspberry_spi_pn532
+    :members:
+    :undoc-members:
+    :show-inheritance:
