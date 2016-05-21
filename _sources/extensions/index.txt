@@ -1,13 +1,7 @@
-janitoo_raspberry_spi_pn532 package
-===================================
+Janitoo's extensions
+====================
 
-Show janitoo's extensions.
+This package contains the following extensions for Janitoo.
 
-Core extensions
----------------
-
-Components
-^^^^^^^^^^
-
- - rpispi.pn532 (janitoo_raspberry_spi_pn532.pn532:make_pn532)
+.. jnt-extensions::
 
