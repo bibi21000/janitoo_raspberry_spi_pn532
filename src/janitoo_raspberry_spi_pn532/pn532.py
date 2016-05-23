@@ -45,7 +45,7 @@ try:
     import Adafruit_PN532 as PN532
     import Adafruit_GPIO as GPIO
     import Adafruit_GPIO.SPI as SPI
-except:
+except Exception:
     logger.exception("Can't import Adafruit_ILI9341")
 
 ##############################################################
@@ -122,7 +122,7 @@ class PN532Component(JNTComponent):
             dc_pin = self._bus.get_spi_device_pin(device)
             spi = self._bus.get_spi_device(device, max_speed_hz=1000000)
             self.setup_pn532(dc_pin, spi, self._ada_gpio)
-        except:
+        except Exception:
             logger.exception("[%s] - Can't start component", self.__class__.__name__)
         finally:
             self._bus.spi_release()
@@ -149,7 +149,7 @@ class PN532Component(JNTComponent):
         self._bus.spi_acquire()
         try:
             self.pn532.close()
-        except:
+        except Exception:
             logger.exception('[%s] - Exception when stopping', self.__class__.__name__)
         finally:
             self.pn532 = None
@@ -201,7 +201,7 @@ class PN532Component(JNTComponent):
                     if data is None:
                         raise RuntimeError('Failed to read data from card')
                     #We should notify something hear
-            except:
+            except Exception:
                 logger.exception('[%s] - Exception when reading rfid', self.__class__.__name__)
             finally:
                 self._bus.spi_release()
@@ -230,7 +230,7 @@ class PN532Component(JNTComponent):
                 raise RuntimeError('Failed to write data to the card.')
             self.values["status"].data='write_ok'
             #We should notify something here
-        except:
+        except Exception:
             logger.exception('[%s] - Exception when writing RFID card', self.__class__.__name__)
             self.values["status"].data='write_error'
             #We should notify something here
