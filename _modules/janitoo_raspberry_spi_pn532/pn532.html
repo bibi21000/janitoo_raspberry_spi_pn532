@@ -154,7 +154,7 @@
     <span class="kn">import</span> <span class="nn">Adafruit_PN532</span> <span class="kn">as</span> <span class="nn">PN532</span>
     <span class="kn">import</span> <span class="nn">Adafruit_GPIO</span> <span class="kn">as</span> <span class="nn">GPIO</span>
     <span class="kn">import</span> <span class="nn">Adafruit_GPIO.SPI</span> <span class="kn">as</span> <span class="nn">SPI</span>
-<span class="k">except</span><span class="p">:</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Can&#39;t import Adafruit_ILI9341&quot;</span><span class="p">)</span>
 
 <span class="c">##############################################################</span>
@@ -231,7 +231,7 @@
             <span class="n">dc_pin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bus</span><span class="o">.</span><span class="n">get_spi_device_pin</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
             <span class="n">spi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bus</span><span class="o">.</span><span class="n">get_spi_device</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">max_speed_hz</span><span class="o">=</span><span class="mi">1000000</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setup_pn532</span><span class="p">(</span><span class="n">dc_pin</span><span class="p">,</span> <span class="n">spi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ada_gpio</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;[</span><span class="si">%s</span><span class="s">] - Can&#39;t start component&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bus</span><span class="o">.</span><span class="n">spi_release</span><span class="p">()</span>
@@ -258,7 +258,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_bus</span><span class="o">.</span><span class="n">spi_acquire</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pn532</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&#39;[</span><span class="si">%s</span><span class="s">] - Exception when stopping&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pn532</span> <span class="o">=</span> <span class="bp">None</span>
@@ -310,7 +310,7 @@
                     <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Failed to read data from card&#39;</span><span class="p">)</span>
                     <span class="c">#We should notify something hear</span>
-            <span class="k">except</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&#39;[</span><span class="si">%s</span><span class="s">] - Exception when reading rfid&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
             <span class="k">finally</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_bus</span><span class="o">.</span><span class="n">spi_release</span><span class="p">()</span>
@@ -339,7 +339,7 @@
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Failed to write data to the card.&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="s">&quot;status&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="s">&#39;write_ok&#39;</span>
             <span class="c">#We should notify something here</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&#39;[</span><span class="si">%s</span><span class="s">] - Exception when writing RFID card&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="s">&quot;status&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="s">&#39;write_error&#39;</span>
             <span class="c">#We should notify something here</span>
