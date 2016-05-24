@@ -58,6 +58,8 @@ COMMAND_CONTROLLER = 0x1050
 assert(COMMAND_DESC[COMMAND_CONTROLLER] == 'COMMAND_CONTROLLER')
 ##############################################################
 
+from janitoo_raspberry_spi import OID
+
 def make_pn532(**kwargs):
     return PN532Component(**kwargs)
 
@@ -67,7 +69,7 @@ class PN532Component(JNTComponent):
     def __init__(self, bus=None, addr=None, **kwargs):
         """
         """
-        oid = kwargs.pop('oid', 'rpispi.pn532')
+        oid = kwargs.pop('oid', '%s.pn532'%OID)
         name = kwargs.pop('name', "Screen")
         product_name = kwargs.pop('product_name', "RFID component")
         product_type = kwargs.pop('product_type', "RFID component")
