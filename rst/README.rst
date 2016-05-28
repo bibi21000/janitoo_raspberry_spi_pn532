@@ -29,3 +29,7 @@ Documentation
 =============
 You can browse online documentation here : https://bibi21000.github.io/janitoo_raspberry_spi_pn532/.
 
+Tutorial
+========
+You can find a tutorial here : https://bibi21000.github.io/janitoo_tutorial/.
+
